@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Калькулятор больших чисел</title>
+		<link rel="stylesheet" href="styles.css" />
+	</head>
+	<body>
+		<div class="container">
+			<div class="calculator">
+				<div class="header">
+					<h1>Калькулятор больших чисел</h1>
+					<div class="student-info">
+						<p><strong>Студент:</strong> Бань Мария Васильевна</p>
+						<p><strong>Курс:</strong> 4</p>
+						<p><strong>Группа:</strong> 4</p>
+						<p><strong>Год:</strong> 2025</p>
+					</div>
+				</div>
+
+				<div class="calculator-body">
+					<div class="input-section">
+						<div class="input-group">
+							<label for="number1">Первое число:</label>
+							<input
+								type="text"
+								id="number1"
+								placeholder="Введите первое число"
+							/>
+						</div>
+
+						<div class="operation-section">
+							<label>Операция:</label>
+							<div class="operation-buttons">
+								<button id="addBtn" class="operation-btn active">
+									Сложение (+)
+								</button>
+								<button id="subtractBtn" class="operation-btn">
+									Вычитание (-)
+								</button>
+							</div>
+						</div>
+
+						<div class="input-group">
+							<label for="number2">Второе число:</label>
+							<input
+								type="text"
+								id="number2"
+								placeholder="Введите второе число"
+							/>
+						</div>
+					</div>
+
+					<div class="result-section">
+						<button id="calculateBtn" class="calculate-btn">Вычислить</button>
+						<div id="result" class="result-display"></div>
+					</div>
+
+					<div class="info-section">
+						<p class="range-info">
+							Диапазон чисел: от -1,000,000,000,000.000000 до
+							+1,000,000,000,000.000000
+						</p>
+						<p class="format-info">
+							Поддерживаются разделители: точка (.) и запятая (,)
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script src="script.js"></script>
+	</body>
+</html>
