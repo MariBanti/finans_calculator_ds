@@ -2,66 +2,86 @@ class BigNumberCalculator {
 	constructor() {
 		this.initializeElements();
 		this.bindEvents();
-		this.currentOperation = "add";
+		this.operations = {
+			op1: "add",
+			op2: "add",
+			op3: "add",
+		};
+		this.updatePreview();
 	}
 
 	initializeElements() {
 		this.number1Input = document.getElementById("number1");
 		this.number2Input = document.getElementById("number2");
-		this.addBtn = document.getElementById("addBtn");
-		this.subtractBtn = document.getElementById("subtractBtn");
-		this.multiplyBtn = document.getElementById("multiplyBtn");
-		this.divideBtn = document.getElementById("divideBtn");
+		this.number3Input = document.getElementById("number3");
+		this.number4Input = document.getElementById("number4");
 		this.calculateBtn = document.getElementById("calculateBtn");
 		this.resultDisplay = document.getElementById("result");
+		this.roundingSection = document.getElementById("rounding-section");
+		this.roundedResultDisplay = document.getElementById("rounded-result");
+		this.op1Preview = document.getElementById("op1-preview");
+		this.op2Preview = document.getElementById("op2-preview");
+		this.op3Preview = document.getElementById("op3-preview");
 	}
 
 	bindEvents() {
-		this.addBtn.addEventListener("click", () => this.selectOperation("add"));
-		this.subtractBtn.addEventListener("click", () =>
-			this.selectOperation("subtract")
-		);
-		this.multiplyBtn.addEventListener("click", () =>
-			this.selectOperation("multiply")
-		);
-		this.divideBtn.addEventListener("click", () =>
-			this.selectOperation("divide")
-		);
+		document.querySelectorAll(".op-btn-small").forEach(btn => {
+			btn.addEventListener("click", e => {
+				const opNum = e.target.dataset.op;
+				const opType = e.target.dataset.type;
+				this.selectOperation(opNum, opType);
+			});
+		});
 
 		this.calculateBtn.addEventListener("click", () => this.calculate());
 
-		this.number1Input.addEventListener("input", e => this.normalizeInput(e));
-		this.number2Input.addEventListener("input", e => this.normalizeInput(e));
-
-		this.number1Input.addEventListener("keydown", e =>
-			this.handleKeyboardShortcuts(e)
-		);
-		this.number2Input.addEventListener("keydown", e =>
-			this.handleKeyboardShortcuts(e)
-		);
-
-		this.number1Input.addEventListener("keypress", e => {
-			if (e.key === "Enter") this.calculate();
+		[
+			this.number1Input,
+			this.number2Input,
+			this.number3Input,
+			this.number4Input,
+		].forEach(input => {
+			input.addEventListener("input", e => this.normalizeInput(e));
+			input.addEventListener("keydown", e => this.handleKeyboardShortcuts(e));
+			input.addEventListener("keypress", e => {
+				if (e.key === "Enter") this.calculate();
+			});
 		});
-		this.number2Input.addEventListener("keypress", e => {
-			if (e.key === "Enter") this.calculate();
+
+		document.querySelectorAll(".rounding-btn").forEach(btn => {
+			btn.addEventListener("click", e => {
+				const roundingType = e.target.dataset.rounding;
+				this.applyRounding(roundingType);
+			});
 		});
 	}
 
-	selectOperation(operation) {
-		this.currentOperation = operation;
+	selectOperation(opNum, opType) {
+		this.operations[`op${opNum}`] = opType;
 
-		this.addBtn.classList.toggle("active", operation === "add");
-		this.subtractBtn.classList.toggle("active", operation === "subtract");
-		this.multiplyBtn.classList.toggle("active", operation === "multiply");
-		this.divideBtn.classList.toggle("active", operation === "divide");
+		document.querySelectorAll(`[data-op="${opNum}"]`).forEach(btn => {
+			btn.classList.toggle("active", btn.dataset.type === opType);
+		});
+
+		this.updatePreview();
+	}
+
+	updatePreview() {
+		const opSymbols = {
+			add: "+",
+			subtract: "-",
+			multiply: "×",
+			divide: "÷",
+		};
+
+		this.op1Preview.textContent = opSymbols[this.operations.op1];
+		this.op2Preview.textContent = opSymbols[this.operations.op2];
+		this.op3Preview.textContent = opSymbols[this.operations.op3];
 	}
 
 	normalizeInput(event) {
 		let value = event.target.value;
-
 		value = value.replace(/,/g, ".");
-
 		value = value.replace(/[^0-9.\-\s]/g, "");
 
 		if (value.indexOf("-") > 0) {
@@ -127,7 +147,6 @@ class BigNumberCalculator {
 
 			if (intWithoutSpaces.length > 0 && intPart.includes(" ")) {
 				const correctFormat = this.formatIntegerPart(intWithoutSpaces);
-
 				const userSpacesPattern = intPart.replace(/\d/g, "");
 				const correctSpacesPattern = correctFormat.replace(/\d/g, "");
 
@@ -158,7 +177,6 @@ class BigNumberCalculator {
 		const num = parseFloat(numStr);
 		const min = -1000000000000.0;
 		const max = 1000000000000.0;
-
 		return num >= min && num <= max;
 	}
 
@@ -177,6 +195,54 @@ class BigNumberCalculator {
 		}
 
 		return result;
+	}
+
+	roundTo10Decimals(numStr) {
+		const num = parseFloat(numStr);
+		if (isNaN(num)) return numStr;
+
+		const multiplier = Math.pow(10, 10);
+		const rounded = Math.round(num * multiplier) / multiplier;
+
+		const parts = rounded.toString().split(".");
+		if (parts.length === 1) {
+			return parts[0] + ".0000000000";
+		}
+
+		const decPart = parts[1].padEnd(10, "0").substring(0, 10);
+		return parts[0] + "." + decPart;
+	}
+
+	roundMathematical(numStr) {
+		const num = parseFloat(numStr);
+		if (isNaN(num)) return "0";
+		return Math.round(num).toString();
+	}
+
+	roundBankers(numStr) {
+		const num = parseFloat(numStr);
+		if (isNaN(num)) return "0";
+
+		const absNum = Math.abs(num);
+		const floor = Math.floor(absNum);
+		const decimal = absNum - floor;
+
+		if (
+			Math.abs(decimal - 0.5) < 0.0000001 ||
+			(Math.abs(decimal - 0.5) > 0.4999999 &&
+				Math.abs(decimal - 0.5) < 0.5000001)
+		) {
+			const result = (floor % 2 === 0 ? floor : floor + 1) * (num < 0 ? -1 : 1);
+			return result.toString();
+		}
+
+		return Math.round(num).toString();
+	}
+
+	roundTruncate(numStr) {
+		const num = parseFloat(numStr);
+		if (isNaN(num)) return "0";
+		return Math.trunc(num).toString();
 	}
 
 	formatResult(resultStr) {
@@ -201,6 +267,21 @@ class BigNumberCalculator {
 		}
 
 		return (isNegative ? "-" : "") + intPart;
+	}
+
+	performOperation(num1Str, num2Str, operation) {
+		switch (operation) {
+			case "add":
+				return this.addBigNumbers(num1Str, num2Str);
+			case "subtract":
+				return this.subtractBigNumbers(num1Str, num2Str);
+			case "multiply":
+				return this.multiplyBigNumbers(num1Str, num2Str);
+			case "divide":
+				return this.divideBigNumbers(num1Str, num2Str);
+			default:
+				throw new Error("Неизвестная операция");
+		}
 	}
 
 	addBigNumbers(num1Str, num2Str) {
@@ -316,7 +397,7 @@ class BigNumberCalculator {
 		const num1 = BigInt(int1 + dec1);
 		const num2 = BigInt(int2 + dec2);
 
-		const precision = 6;
+		const precision = 10;
 		const multiplier = BigInt(10 ** precision);
 		const num1Scaled = num1 * multiplier;
 
@@ -348,52 +429,140 @@ class BigNumberCalculator {
 
 	calculate() {
 		try {
-			const num1Str = this.parseNumber(this.number1Input.value);
-			const num2Str = this.parseNumber(this.number2Input.value);
+			const num1Str = this.parseNumber(this.number1Input.value) || "0";
+			const num2Str = this.parseNumber(this.number2Input.value) || "0";
+			const num3Str = this.parseNumber(this.number3Input.value) || "0";
+			const num4Str = this.parseNumber(this.number4Input.value) || "0";
 
-			if (num1Str === null || num2Str === null) {
-				this.showResult("Пожалуйста, введите оба числа", "error");
-				return;
-			}
-
-			if (!this.validateRange(num1Str) || !this.validateRange(num2Str)) {
+			if (
+				!this.validateRange(num1Str) ||
+				!this.validateRange(num2Str) ||
+				!this.validateRange(num3Str) ||
+				!this.validateRange(num4Str)
+			) {
 				this.showResult(
 					"Числа должны быть в диапазоне от -1,000,000,000,000.000000 до +1,000,000,000,000.000000",
 					"error"
 				);
+				this.roundingSection.style.display = "none";
 				return;
 			}
 
-			let result;
+			let intermediate1;
 			try {
-				if (this.currentOperation === "add") {
-					result = this.addBigNumbers(num1Str, num2Str);
-				} else if (this.currentOperation === "subtract") {
-					result = this.subtractBigNumbers(num1Str, num2Str);
-				} else if (this.currentOperation === "multiply") {
-					result = this.multiplyBigNumbers(num1Str, num2Str);
-				} else if (this.currentOperation === "divide") {
-					result = this.divideBigNumbers(num1Str, num2Str);
-				}
+				intermediate1 = this.performOperation(
+					num2Str,
+					num3Str,
+					this.operations.op2
+				);
 			} catch (error) {
 				this.showResult(`Ошибка: ${error.message}`, "error");
+				this.roundingSection.style.display = "none";
 				return;
 			}
 
-			if (!this.validateRange(result)) {
+			intermediate1 = this.roundTo10Decimals(intermediate1);
+
+			if (!this.validateRange(intermediate1)) {
+				this.showResult(
+					"Переполнение: промежуточное вычисление превышает допустимый диапазон",
+					"error"
+				);
+				this.roundingSection.style.display = "none";
+				return;
+			}
+
+			let intermediate2;
+			try {
+				intermediate2 = this.performOperation(
+					num1Str,
+					intermediate1,
+					this.operations.op1
+				);
+			} catch (error) {
+				this.showResult(`Ошибка: ${error.message}`, "error");
+				this.roundingSection.style.display = "none";
+				return;
+			}
+
+			intermediate2 = this.roundTo10Decimals(intermediate2);
+
+			if (!this.validateRange(intermediate2)) {
+				this.showResult(
+					"Переполнение: промежуточное вычисление превышает допустимый диапазон",
+					"error"
+				);
+				this.roundingSection.style.display = "none";
+				return;
+			}
+
+			let finalResult;
+			try {
+				finalResult = this.performOperation(
+					intermediate2,
+					num4Str,
+					this.operations.op3
+				);
+			} catch (error) {
+				this.showResult(`Ошибка: ${error.message}`, "error");
+				this.roundingSection.style.display = "none";
+				return;
+			}
+
+			if (!this.validateRange(finalResult)) {
 				this.showResult(
 					"Переполнение: результат превышает допустимый диапазон",
 					"error"
 				);
+				this.roundingSection.style.display = "none";
 				return;
 			}
 
-			result = this.formatResult(result);
+			this.finalResult = finalResult;
 
-			this.showResult(`Результат: ${result}`, "success");
+			const formattedResult = this.formatResult(finalResult);
+			this.showResult(`Результат: ${formattedResult}`, "success");
+
+			this.roundingSection.style.display = "block";
+			this.roundedResultDisplay.textContent = "";
+
+			document.querySelectorAll(".rounding-btn").forEach(btn => {
+				btn.classList.remove("active");
+			});
 		} catch (error) {
 			this.showResult(`Ошибка: ${error.message}`, "error");
+			this.roundingSection.style.display = "none";
 		}
+	}
+
+	applyRounding(roundingType) {
+		if (!this.finalResult) return;
+
+		document.querySelectorAll(".rounding-btn").forEach(btn => {
+			btn.classList.toggle("active", btn.dataset.rounding === roundingType);
+		});
+
+		let rounded;
+		switch (roundingType) {
+			case "math":
+				rounded = this.roundMathematical(this.finalResult);
+				break;
+			case "bank":
+				rounded = this.roundBankers(this.finalResult);
+				break;
+			case "truncate":
+				rounded = this.roundTruncate(this.finalResult);
+				break;
+			default:
+				return;
+		}
+
+		const isNegative = rounded.startsWith("-");
+		const absRounded = isNegative ? rounded.substring(1) : rounded;
+		const formattedRounded = this.formatIntegerPart(absRounded);
+		const finalFormatted = (isNegative ? "-" : "") + formattedRounded;
+
+		this.roundedResultDisplay.textContent = `Округленный до целых результат: ${finalFormatted}`;
 	}
 
 	showResult(message, type) {

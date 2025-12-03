@@ -20,47 +20,134 @@
 				</div>
 
 				<div class="calculator-body">
-					<div class="input-section">
-						<div class="input-group">
-							<label for="number1">Первое число:</label>
-							<input
-								type="text"
-								id="number1"
-								placeholder="Введите первое число"
-							/>
+					<div class="expression-preview">
+						<div class="expression-line">
+							<span class="number-label">Число1</span>
+							<span class="operation-label" id="op1-preview">+</span>
+							<span class="bracket">(</span>
+							<span class="number-label">Число2</span>
+							<span class="operation-label" id="op2-preview">+</span>
+							<span class="number-label">Число3</span>
+							<span class="bracket">)</span>
+							<span class="operation-label" id="op3-preview">+</span>
+							<span class="number-label">Число4</span>
 						</div>
+					</div>
 
-						<div class="operation-section">
-							<label>Операция:</label>
-							<div class="operation-buttons">
-								<button id="addBtn" class="operation-btn active">
-									Сложение (+)
-								</button>
-								<button id="subtractBtn" class="operation-btn">
-									Вычитание (-)
-								</button>
-								<button id="multiplyBtn" class="operation-btn">
-									Умножение (×)
-								</button>
-								<button id="divideBtn" class="operation-btn">
-									Деление (÷)
-								</button>
+					<div class="input-section">
+						<div class="operand-group">
+							<div class="input-group">
+								<label for="number1">Число 1:</label>
+								<input type="text" id="number1" value="0" placeholder="0" />
+							</div>
+							<div class="operation-selector">
+								<label>Операция 1:</label>
+								<div class="operation-buttons-small">
+									<button
+										data-op="1"
+										data-type="add"
+										class="op-btn-small active"
+									>
+										+
+									</button>
+									<button data-op="1" data-type="subtract" class="op-btn-small">
+										-
+									</button>
+									<button data-op="1" data-type="multiply" class="op-btn-small">
+										×
+									</button>
+									<button data-op="1" data-type="divide" class="op-btn-small">
+										÷
+									</button>
+								</div>
 							</div>
 						</div>
 
-						<div class="input-group">
-							<label for="number2">Второе число:</label>
-							<input
-								type="text"
-								id="number2"
-								placeholder="Введите второе число"
-							/>
+						<div class="operand-group priority-group">
+							<div class="priority-indicator">Приоритет вычислений</div>
+							<div class="input-group">
+								<label for="number2">Число 2:</label>
+								<input type="text" id="number2" value="0" placeholder="0" />
+							</div>
+							<div class="operation-selector">
+								<label>Операция 2:</label>
+								<div class="operation-buttons-small">
+									<button
+										data-op="2"
+										data-type="add"
+										class="op-btn-small active"
+									>
+										+
+									</button>
+									<button data-op="2" data-type="subtract" class="op-btn-small">
+										-
+									</button>
+									<button data-op="2" data-type="multiply" class="op-btn-small">
+										×
+									</button>
+									<button data-op="2" data-type="divide" class="op-btn-small">
+										÷
+									</button>
+								</div>
+							</div>
+							<div class="input-group">
+								<label for="number3">Число 3:</label>
+								<input type="text" id="number3" value="0" placeholder="0" />
+							</div>
+						</div>
+
+						<div class="operand-group">
+							<div class="operation-selector">
+								<label>Операция 3:</label>
+								<div class="operation-buttons-small">
+									<button
+										data-op="3"
+										data-type="add"
+										class="op-btn-small active"
+									>
+										+
+									</button>
+									<button data-op="3" data-type="subtract" class="op-btn-small">
+										-
+									</button>
+									<button data-op="3" data-type="multiply" class="op-btn-small">
+										×
+									</button>
+									<button data-op="3" data-type="divide" class="op-btn-small">
+										÷
+									</button>
+								</div>
+							</div>
+							<div class="input-group">
+								<label for="number4">Число 4:</label>
+								<input type="text" id="number4" value="0" placeholder="0" />
+							</div>
 						</div>
 					</div>
 
 					<div class="result-section">
 						<button id="calculateBtn" class="calculate-btn">Вычислить</button>
 						<div id="result" class="result-display"></div>
+
+						<div
+							id="rounding-section"
+							class="rounding-section"
+							style="display: none"
+						>
+							<div class="rounding-label">Выбор вида округления:</div>
+							<div class="rounding-buttons">
+								<button data-rounding="math" class="rounding-btn">
+									Математическое
+								</button>
+								<button data-rounding="bank" class="rounding-btn">
+									Бухгалтерское
+								</button>
+								<button data-rounding="truncate" class="rounding-btn">
+									Усечение
+								</button>
+							</div>
+							<div id="rounded-result" class="rounded-result-display"></div>
+						</div>
 					</div>
 
 					<div class="info-section">
@@ -73,6 +160,9 @@
 						</p>
 						<p class="format-info">
 							Можно вводить пробелы в целой части числа (например: 1 000 000)
+						</p>
+						<p class="format-info">
+							Промежуточные вычисления округляются до 10 знаков после запятой
 						</p>
 					</div>
 				</div>
